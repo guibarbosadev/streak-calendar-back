@@ -1,5 +1,5 @@
 import express from "express";
-import { DB_URI, PORT } from "./constants";
+import { DB_NAME, DB_URI, PORT } from "./constants";
 import helmet from "helmet";
 import { connectToCluster } from "./db";
 
@@ -14,7 +14,7 @@ app.get("/", (_req, res) => {
 
 app.get("/users", async (_req, res) => {
   const dbConnection = await connectToCluster(DB_URI!);
-  const database = dbConnection.db("calendar");
+  const database = dbConnection.db(DB_NAME);
   const usersCollection = database.collection("users");
   const users = await usersCollection.find().toArray();
 
