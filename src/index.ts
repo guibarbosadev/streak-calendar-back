@@ -1,25 +1,45 @@
 import express from "express";
 import { DB_NAME, DB_URI, PORT } from "./constants";
 import helmet from "helmet";
-import { connectToCluster } from "./db";
+import { connectToDB } from "./db";
+import { activateGoogleStrategy } from "./passport";
+import passport from "passport";
+import session from "express-session";
+import connectMongo from "connect-mongo";
 
 const app = express();
+activateGoogleStrategy();
 
 app.use(express.json());
 app.use(helmet());
+app.use(
+  session({
+    secret: "keyboard cat",
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.get("/", (_req, res) => {
-  res.json({ up: "and running" });
+  res.send("and running");
 });
 
-app.get("/users", async (_req, res) => {
-  const dbConnection = await connectToCluster(DB_URI!);
-  const database = dbConnection.db(DB_NAME);
-  const usersCollection = database.collection("users");
-  const users = await usersCollection.find().toArray();
+app.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["email", "profile"] })
+);
+app.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { scope: ["email", "profile"] }),
+  (req, res) => {
+    res.redirect("/profile");
+  }
+);
 
-  res.json(users);
-  dbConnection.close();
+app.get("/profile", (req, res) => {
+  const { isAuthenticated } = req;
+  console.log({ isAuthenticated: isAuthenticated() });
+  res.send("Hello, you are authenticated");
 });
 
 app.listen(PORT, async () => {

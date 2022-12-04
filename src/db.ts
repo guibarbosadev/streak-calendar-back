@@ -1,15 +1,20 @@
 import { MongoClient } from "mongodb";
+import mongoose from "mongoose";
 
-export async function connectToCluster(URI: string) {
+function handleError() {
+  const ERROR_MESSAGE = "Could not connect to database 😕";
+
+  console.log(ERROR_MESSAGE);
+  process.exit();
+}
+
+export function connectToDB(URI: string) {
   try {
-    const mongoClient = new MongoClient(URI);
+    const { connection: db } = mongoose;
 
-    await mongoClient.connect();
-
-    return mongoClient;
+    db.on("error", handleError);
+    mongoose.connect(URI);
   } catch (error) {
-    console.log("Could not connect to database 😕");
-
     process.exit();
   }
 }
