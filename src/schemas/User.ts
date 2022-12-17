@@ -21,10 +21,14 @@ const UserSchema = new Schema<IUser, UserModel>(
           result = await self.create<IUser>({ googleId });
         }
 
-        result;
+        return result;
       },
     },
   }
 );
 
-export const User = mongoose.model<IUser, UserModel>("User", UserSchema);
+export const User = mongoose.model<IUser, UserModel>(
+  "User",
+  UserSchema,
+  "users"
+);

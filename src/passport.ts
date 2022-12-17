@@ -9,7 +9,7 @@ export function activateGoogleStrategy() {
       {
         clientID: GOOGLE_CLIENT_ID,
         clientSecret: GOOGLE_CLIENT_SECRET,
-        callbackURL: "http://localhost:8080/google/callback",
+        callbackURL: "http://localhost:8080/auth/google/callback",
         passReqToCallback: true,
       },
       async (_request, _accessToken, _refreshToken, { id: googleId }, done) => {
@@ -22,4 +22,16 @@ export function activateGoogleStrategy() {
       }
     )
   );
+  passport.serializeUser((user: { _id?: string }, done) => {
+    process.nextTick(() => done(null, user?._id));
+  });
+
+  passport.deserializeUser((id: string, done) => {
+    process.nextTick(() => {
+      User.findById(id, (err: any, user: typeof User) => {
+        if (!err) done(null, user);
+        else done(err, null);
+      });
+    });
+  });
 }
