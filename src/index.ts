@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import {
   AUTH_SESSION_COOKIE_NAME,
   AUTH_SESSION_SECRET,
@@ -57,12 +57,20 @@ app.get("/auth/error", (req, res) => {
   res.json({ message: "Authentication failed", user: req.user });
 });
 
-app.get("/profile", (req, res) => {
+function ensureIsAuthenticated(
+  req: Request,
+  res: express.Response,
+  next: NextFunction
+) {
   if (req.isAuthenticated()) {
-    res.json({ user: req.user });
+    return next();
   } else {
-    res.send("Oopss... you are not authenticated");
+    res.status(401).json({ message: "Not authenticated" });
   }
+}
+
+app.get("/profile", ensureIsAuthenticated, (req, res, next) => {
+  res.json({ user: req.user });
 });
 
 app.listen(PORT, async () => {
