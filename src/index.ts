@@ -1,11 +1,17 @@
 import express from "express";
-import { AUTH_COOKIE_NAME, DB_NAME, DB_URI, PORT } from "./constants";
+import {
+  AUTH_SESSION_COOKIE_NAME,
+  AUTH_SESSION_SECRET,
+  DB_NAME,
+  DB_URI,
+  PORT,
+} from "./constants";
 import helmet from "helmet";
 import { connectToDB } from "./db";
 import { activateGoogleStrategy } from "./passport";
 import passport from "passport";
 import session from "express-session";
-import connectMongo from "connect-mongo";
+import { startSessionStore } from "./sessionStore";
 
 const app = express();
 connectToDB(DB_URI);
@@ -15,8 +21,8 @@ app.use(express.json());
 app.use(helmet());
 app.use(
   session({
-    secret: "keyboard cat",
-    name: AUTH_COOKIE_NAME,
+    secret: AUTH_SESSION_SECRET,
+    name: AUTH_SESSION_COOKIE_NAME,
     resave: false,
     saveUninitialized: false,
     unset: "destroy",
@@ -24,6 +30,7 @@ app.use(
       httpOnly: false,
       maxAge: 300_000, // 5 minutes
     },
+    store: startSessionStore(),
   })
 );
 app.use(passport.initialize());
@@ -51,10 +58,8 @@ app.get("/auth/error", (req, res) => {
 });
 
 app.get("/profile", (req, res) => {
-  const { user } = req;
-
-  if (user) {
-    res.json({ profile: user });
+  if (req.isAuthenticated()) {
+    res.json({ user: req.user });
   } else {
     res.send("Oopss... you are not authenticated");
   }
