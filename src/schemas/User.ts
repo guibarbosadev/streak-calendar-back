@@ -1,7 +1,8 @@
 import mongoose, { Model, Schema } from "mongoose";
 
-interface IUser {
+export interface IUser {
   googleId: string;
+  _id?: string;
 }
 
 interface UserModel extends Model<IUser> {
@@ -27,8 +28,4 @@ const UserSchema = new Schema<IUser, UserModel>(
   }
 );
 
-export const User = mongoose.model<IUser, UserModel>(
-  "User",
-  UserSchema,
-  "users"
-);
+export const User = mongoose.model<IUser, UserModel>("User", UserSchema);

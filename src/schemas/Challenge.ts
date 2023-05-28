@@ -26,7 +26,6 @@ const ChallengeSchema = new Schema<IChallenge>({
 });
 
 export const Challenge = mongoose.model<IChallenge>(
-  "challenges",
-  ChallengeSchema,
-  "users.challenges"
+  "Challenge",
+  ChallengeSchema
 );
