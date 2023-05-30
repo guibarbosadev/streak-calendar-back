@@ -26,21 +26,29 @@ const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 const app = express();
 connectToDB(DB_URI);
 
+app.set("trust proxy", 1);
 app.use(express.json());
 app.use(helmet());
 app.use((_req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET,PUT,POST,DELETE,PATCH,OPTIONS"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
 app.use(
   session({
     secret: AUTH_SESSION_SECRET,
     name: AUTH_SESSION_COOKIE_NAME,
-    resave: false,
-    saveUninitialized: true,
+    resave: true,
+    saveUninitialized: false,
     unset: "destroy",
     cookie: {
       maxAge: 300_000, // 5 minutes
+      sameSite: "none",
     },
     store: startSessionStore(),
   })
