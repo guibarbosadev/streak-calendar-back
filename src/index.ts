@@ -88,7 +88,7 @@ app.post("/login", async (req: TypedRequestBody<{ idToken: string }>, res) => {
 
 app.post("/logout", (req, res) => {
   req.session.destroy(() => undefined);
-  res.status(StatusCodes.OK).send();
+  res.status(StatusCodes.OK).json({ message: "Logout successfully" });
 });
 
 function ensureIsAuthenticated(
