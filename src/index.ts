@@ -58,6 +58,10 @@ app.get("/", ensureIsAuthenticated, (_req, res) => {
   res.send("and running");
 });
 
+app.get("/profile", ensureIsAuthenticated, (req, res) => {
+  res.json({ user: req.session.user });
+});
+
 app.get("/challenges", ensureIsAuthenticated, async (req, res) => {
   const { _id: userId } = req.session.user ?? {};
 
