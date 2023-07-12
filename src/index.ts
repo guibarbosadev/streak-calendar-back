@@ -47,7 +47,7 @@ app.use(
     saveUninitialized: false,
     unset: "destroy",
     cookie: {
-      maxAge: 300_000, // 5 minutes
+      maxAge: 172_800_000, // 2 days
       sameSite: "none",
     },
     store: startSessionStore(),
