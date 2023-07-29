@@ -2,6 +2,7 @@ import express, { NextFunction, Request } from "express";
 import session from "express-session";
 import helmet from "helmet";
 import {
+  ACCESS_CONTROL_ALLOW_ORIGIN,
   AUTH_SESSION_COOKIE_NAME,
   AUTH_SESSION_SECRET,
   DB_URI,
@@ -30,7 +31,7 @@ app.set("trust proxy", 1);
 app.use(express.json());
 app.use(helmet());
 app.use((_req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.setHeader("Access-Control-Allow-Origin", ACCESS_CONTROL_ALLOW_ORIGIN);
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader(
     "Access-Control-Allow-Methods",
