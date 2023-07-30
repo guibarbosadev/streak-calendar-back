@@ -38,6 +38,7 @@ app.use((_req, res, next) => {
     "GET,PUT,POST,DELETE,PATCH,OPTIONS"
   );
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
   next();
 });
 app.use(
@@ -74,18 +75,23 @@ app.get("/challenges", ensureIsAuthenticated, async (req, res) => {
 app.post("/login", async (req: TypedRequestBody<{ idToken: string }>, res) => {
   const { idToken = "" } = req.body ?? {};
 
-  if (idToken) {
-    const ticket = await googleClient.verifyIdToken({ idToken });
-    const googleId = ticket.getUserId() ?? "";
+  try {
+    if (idToken) {
+      const ticket = await googleClient.verifyIdToken({ idToken });
+      const googleId = ticket.getUserId() ?? "";
 
-    const userDoc = await User.findOne({ googleId });
-    const user: IUser = JSON.parse(JSON.stringify(userDoc?.toJSON()));
+      const userDoc = await User.findOne({ googleId });
+      const user: IUser = JSON.parse(JSON.stringify(userDoc?.toJSON()));
 
-    if (user) {
-      req.session.user = user;
-      res.json(user);
-      return;
+      if (user) {
+        req.session.user = user;
+        res.json(user);
+        return;
+      }
     }
+  } catch (error) {
+    console.log(error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
   }
 
   res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
