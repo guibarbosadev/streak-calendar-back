@@ -15,7 +15,8 @@ import { StatusCodes, ReasonPhrases } from "http-status-codes";
 import { TypedRequestBody, TOAuthProvider } from "./types";
 import { OAuth2Client } from "google-auth-library";
 import { IUser, User } from "./schemas/User";
-import { Challenge } from "./schemas/Challenge";
+import { Challenge, IChallenge } from "./schemas/Challenge";
+import mongoose from "mongoose";
 
 declare module "express-session" {
   interface SessionData {
@@ -91,11 +92,28 @@ app.post("/login", async (req: TypedRequestBody<{ idToken: string }>, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
   }
 
   res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
 });
+
+app.post(
+  "/challenge",
+  ensureIsAuthenticated,
+  async (req: TypedRequestBody<{ name: string }>, res) => {
+    const { _id: userId = "" } = req.session.user ?? {};
+    const { name } = req.body;
+    const _id = new mongoose.Types.ObjectId();
+    const challenge = { name, calendar: {}, userId, _id };
+
+    try {
+      await Challenge.create(challenge);
+      res.json(challenge);
+    } catch {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
+    }
+  }
+);
 
 app.post("/logout", (req, res) => {
   req.session.destroy(() => undefined);
