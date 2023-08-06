@@ -12,11 +12,12 @@ import {
 import { connectToDB } from "./db";
 import { startSessionStore } from "./sessionStore";
 import { StatusCodes, ReasonPhrases } from "http-status-codes";
-import { TypedRequestBody, TOAuthProvider } from "./types";
+import { TypedRequestBody, TOAuthProvider, IMarkDayParams } from "./types";
 import { OAuth2Client } from "google-auth-library";
 import { IUser, User } from "./schemas/User";
 import { Challenge, IChallenge } from "./schemas/Challenge";
 import mongoose from "mongoose";
+import { checkIsDateValid, markDay } from "./util";
 
 declare module "express-session" {
   interface SessionData {
@@ -109,6 +110,35 @@ app.post(
     try {
       await Challenge.create(challenge);
       res.json(challenge);
+    } catch {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
+    }
+  }
+);
+
+app.put(
+  "/mark",
+  ensureIsAuthenticated,
+  async (req: TypedRequestBody<IMarkDayParams>, res) => {
+    const { challenge, date, status } = req.body ?? {};
+    const { calendar } = challenge;
+    const isDateValid = checkIsDateValid(date);
+
+    if (!isDateValid) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Invalid date" });
+    }
+
+    try {
+      const updatedCalendar = markDay({ calendar, date, status });
+      const challengeDoc = await Challenge.findOneAndUpdate(
+        { _id: challenge._id },
+        { $set: { calendar: updatedCalendar } },
+        { new: true }
+      );
+
+      res.json(challengeDoc?.toJSON());
     } catch {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
     }

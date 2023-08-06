@@ -5,12 +5,20 @@ export enum EChallengeStatus {
   Skipped = "skipped",
 }
 
+export type TChallengeStatus = EChallengeStatus | undefined;
+
 export interface IChallengeCalendar {
   [year: number]: {
     [month: number]: {
-      [day: number]: EChallengeStatus;
+      [day: number]: TChallengeStatus;
     };
   };
+}
+
+export interface ICustomDate {
+  year: number;
+  month: number;
+  day: number;
 }
 
 export interface IChallenge {
