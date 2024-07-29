@@ -58,7 +58,7 @@ app.use(
   })
 );
 
-app.get("/", ensureIsAuthenticated, (_req, res) => {
+app.get("/", (_req, res) => {
   res.send("and running");
 });
 
